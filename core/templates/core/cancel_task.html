@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}Cancel Task - LocalHelp{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <div class="form-card">
+        <h2>❌ Cancel Task</h2>
+
+        <div class="task-preview">
+            <h4>{{ task.title }}</h4>
+            <p>{{ task.description|truncatechars:200 }}</p>
+            <div class="task-meta">
+                <span>💰 ₹{{ task.payment_amount }}</span>
+                <span class="status-badge status-{{ task.status|lower }}">{{ task.status }}</span>
+            </div>
+        </div>
+
+        <div class="warning-box">
+            ⚠️ Are you sure you want to cancel this task? This action cannot be undone.
+        </div>
+
+        <form method="post" action="{% url 'cancel_task' task.id %}">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label for="cancel_reason">Reason for cancellation (optional)</label>
+                <textarea
+                    id="cancel_reason"
+                    name="cancel_reason"
+                    rows="3"
+                    placeholder="Why are you cancelling? (This helps the other party understand)"
+                ></textarea>
+            </div>
+
+            <div class="form-actions">
+                <a href="{% url 'dashboard' %}" class="btn btn-secondary">← Keep Task</a>
+                <button type="submit" class="btn btn-danger">Confirm Cancellation</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

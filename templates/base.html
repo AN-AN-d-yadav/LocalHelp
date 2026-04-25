@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title></title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="nav-brand">
+            <a href="{% url 'home' %}">🤝 LocalHelp</a>
+        </div>
+
+        <div class="nav-links">
+            {% if user.is_authenticated %}
+
+                <span class="role-badge role-{{ user.userprofile.active_role }}">
+                    {% if user.userprofile.active_role == 'requester' %}📋 Requester
+                    {% else %}🔧 Helper{% endif %}
+                </span>
+
+                <a href="{% url 'dashboard' %}">Dashboard</a>
+                <a href="{% url 'select_role' %}">Switch Role</a>
+                <a href="{% url 'profile' user.username %}">
+                    👤 {{ user.username }}
+                    {% if user.userprofile.trust_score > 0 %}
+                        (⭐ {{ user.userprofile.trust_score }})
+                    {% endif %}
+                </a>
+
+                <form method="post" action="{% url 'logout' %}" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-link">Logout</button>
+                </form>
+
+            {% else %}
+                <a href="{% url 'login' %}">Login</a>
+                <a href="{% url 'register' %}">Register</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    {% if messages %}
+        <div class="messages-container">
+            {% for message in messages %}
+                <div class="message message-{{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <main class="main-content">
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <footer class="footer">
+        <p>LocalHelp — A Role-Based Task Marketplace | Built with ❤️</p>
+        <small>Design And Developed By -<b><i> Anand Kumar Yadav</i></b></small>
+    </footer>
+
+</body>
+</html>

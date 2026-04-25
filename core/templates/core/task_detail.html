@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+
+{% block title %}{{ task.title }} - LocalHelp{% endblock %}
+
+{% block content %}
+<div class="detail-container">
+
+    <div class="detail-header">
+        <div>
+            <h2>{{ task.title }}</h2>
+            <span class="status-badge status-{{ task.status|lower }} status-large">
+                {{ task.get_status_display }}
+            </span>
+        </div>
+        <div class="task-payment">
+            💰 <strong>₹{{ task.payment_amount }}</strong>
+        </div>
+    </div>
+
+    <div class="detail-card">
+        <h3>📄 Description</h3>
+        <p class="task-full-desc">{{ task.description }}</p>
+
+        <div class="detail-grid">
+            <div class="detail-item">
+                <span class="detail-label">Posted by</span>
+                <span><a href="{% url 'profile' task.requester.username %}">{{ task.requester.username }}</a></span>
+            </div>
+
+            <div class="detail-item">
+                <span class="detail-label">Posted on</span>
+                <span>{{ task.created_at|date:"M d, Y at H:i" }}</span>
+            </div>
+
+            {% if task.helper %}
+                <div class="detail-item">
+                    <span class="detail-label">Helper</span>
+                    <span><a href="{% url 'profile' task.helper.username %}">{{ task.helper.username }}</a></span>
+                </div>
+            {% endif %}
+
+            {% if task.accepted_at %}
+                <div class="detail-item">
+                    <span class="detail-label">Accepted on</span>
+                    <span>{{ task.accepted_at|date:"M d, Y at H:i" }}</span>
+                </div>
+            {% endif %}
+
+            {% if task.completed_at %}
+                <div class="detail-item">
+                    <span class="detail-label">Completed on</span>
+                    <span>{{ task.completed_at|date:"M d, Y at H:i" }}</span>
+                </div>
+            {% endif %}
+
+            {% if task.latitude and task.longitude %}
+                <div class="detail-item">
+                    <span class="detail-label">📍 Location</span>
+                    <span>{{ task.latitude }}, {{ task.longitude }}</span>
+                </div>
+            {% endif %}
+
+            {% if task.cancel_reason %}
+                <div class="detail-item">
+                    <span class="detail-label">Cancellation Reason</span>
+                    <span>{{ task.cancel_reason }}</span>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="detail-actions">
+
+        {% if request.user == task.requester %}
+            {% if task.status == 'COMPLETION_REQUESTED' %}
+                <form method="post" action="{% url 'approve_completion' task.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-success">✅ Approve Completion</button>
+                </form>
+            {% endif %}
+
+            {% if task.status == 'COMPLETED' and not user_already_rated %}
+                <a href="{% url 'rate_user' task.id %}" class="btn btn-warning">⭐ Rate Helper</a>
+            {% endif %}
+
+            {% if task.status in 'OPEN,ACCEPTED' %}
+                <a href="{% url 'cancel_task' task.id %}" class="btn btn-danger">❌ Cancel Task</a>
+            {% endif %}
+        {% endif %}
+
+        {% if request.user == task.helper %}
+            {% if task.status == 'ACCEPTED' %}
+                <form method="post" action="{% url 'request_completion' task.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-success">✅ Mark as Done</button>
+                </form>
+                <a href="{% url 'cancel_task' task.id %}" class="btn btn-danger">❌ Cancel</a>
+            {% endif %}
+
+            {% if task.status == 'COMPLETED' and not user_already_rated %}
+                <a href="{% url 'rate_user' task.id %}" class="btn btn-warning">⭐ Rate Requester</a>
+            {% endif %}
+        {% endif %}
+
+        {% if profile.active_role == 'helper' and task.status == 'OPEN' and request.user != task.requester %}
+            <form method="post" action="{% url 'accept_task' task.id %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-primary">🤝 Accept Task</button>
+            </form>
+        {% endif %}
+
+        <a href="{% url 'dashboard' %}" class="btn btn-secondary">← Back to Dashboard</a>
+    </div>
+
+    {% if task_ratings %}
+        <div class="ratings-section">
+            <h3>⭐ Ratings for this Task</h3>
+            {% for rating in task_ratings %}
+                <div class="rating-card">
+                    <div class="rating-header">
+                        <a href="{% url 'profile' rating.rater.username %}">{{ rating.rater.username }}</a>
+                        <span>→</span>
+                        <a href="{% url 'profile' rating.ratee.username %}">{{ rating.ratee.username }}</a>
+                        <span class="stars">
+                            {% for i in "12345" %}
+                                {% if forloop.counter <= rating.rating %}⭐{% else %}☆{% endif %}
+                            {% endfor %}
+                            ({{ rating.rating }}/5)
+                        </span>
+                    </div>
+                    {% if rating.comment %}
+                        <p class="rating-comment">"{{ rating.comment }}"</p>
+                    {% endif %}
+                    <small>{{ rating.created_at|date:"M d, Y" }}</small>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+</div>
+{% endblock %}

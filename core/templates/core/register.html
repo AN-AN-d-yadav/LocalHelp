@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}Register - LocalHelp{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <h2>📝 Create Account</h2>
+        <p class="auth-subtitle">Join LocalHelp and start posting or accepting tasks</p>
+
+        <form method="post" action="{% url 'register' %}">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input
+                    type="text"
+                    id="username"
+                    name="username"
+                    placeholder="Choose a username"
+                    required
+                    autocomplete="off"
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email (optional)</label>
+                <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    placeholder="your@email.com"
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="password1">Password</label>
+                <input
+                    type="password"
+                    id="password1"
+                    name="password1"
+                    placeholder="At least 8 characters"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="password2">Confirm Password</label>
+                <input
+                    type="password"
+                    id="password2"
+                    name="password2"
+                    placeholder="Repeat password"
+                    required
+                >
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-full">Create Account</button>
+        </form>
+
+        <p class="auth-link">
+            Already have an account? <a href="{% url 'login' %}">Login here</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

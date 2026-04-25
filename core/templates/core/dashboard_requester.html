@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}Requester Dashboard - LocalHelp{% endblock %}
+
+{% block content %}
+<div class="dashboard">
+    <div class="dashboard-header">
+        <h2>📋 Requester Dashboard</h2>
+        <a href="{% url 'create_task' %}" class="btn btn-primary">+ Create New Task</a>
+    </div>
+
+    <div class="stats-bar">
+        <div class="stat">
+            <span class="stat-value">{{ tasks.count }}</span>
+            <span class="stat-label">Total Tasks</span>
+        </div>
+        <div class="stat">
+            <span class="stat-value">⭐ {{ profile.trust_score }}</span>
+            <span class="stat-label">Trust Score</span>
+        </div>
+    </div>
+
+    <h3>My Tasks</h3>
+
+    {% if tasks %}
+        <div class="task-list">
+            {% for task in tasks %}
+                <div class="task-card status-{{ task.status|lower }}">
+                    <div class="task-card-header">
+                        <h4>
+                            <a href="{% url 'task_detail' task.id %}">{{ task.title }}</a>
+                        </h4>
+                        <span class="status-badge status-{{ task.status|lower }}">
+                            {{ task.status }}
+                        </span>
+                    </div>
+
+                    <p class="task-desc">{{ task.description|truncatechars:100 }}</p>
+
+                    <div class="task-meta">
+                        <span>💰 ₹{{ task.payment_amount }}</span>
+                        <span>📅 {{ task.created_at|date:"M d, Y H:i" }}</span>
+                        {% if task.helper %}
+                            <span>🔧 Helper: <a href="{% url 'profile' task.helper.username %}">{{ task.helper.username }}</a></span>
+                        {% endif %}
+                    </div>
+
+                    <div class="task-actions">
+
+                        {% if task.status == 'COMPLETION_REQUESTED' %}
+                            <form method="post" action="{% url 'approve_completion' task.id %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-success">✅ Approve Completion</button>
+                            </form>
+                        {% endif %}
+
+                        {% if task.status == 'COMPLETED' %}
+                            <a href="{% url 'rate_user' task.id %}" class="btn btn-warning">⭐ Rate Helper</a>
+                        {% endif %}
+
+                        {% if task.status == 'OPEN' or task.status == 'ACCEPTED' %}
+                            <a href="{% url 'cancel_task' task.id %}" class="btn btn-danger">❌ Cancel</a>
+                        {% endif %}
+
+                        <a href="{% url 'task_detail' task.id %}" class="btn btn-secondary">View Details</a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <span class="empty-icon">📭</span>
+            <p>You haven't posted any tasks yet.</p>
+            <a href="{% url 'create_task' %}" class="btn btn-primary">Create Your First Task</a>
+        </div>
+    {% endif %}
+
+</div>
+{% endblock %}

@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}Create Task - LocalHelp{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <div class="form-card">
+        <h2>📋 Create a New Task</h2>
+        <p class="form-subtitle">Describe what you need help with and set a payment amount.</p>
+
+        <form method="post" action="{% url 'create_task' %}">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label for="title">Task Title *</label>
+                <input
+                    type="text"
+                    id="title"
+                    name="title"
+                    placeholder="e.g., Move furniture to 2nd floor"
+                    required
+                    maxlength="200"
+                >
+                <small>Keep it short and clear (max 200 characters)</small>
+            </div>
+
+            <div class="form-group">
+                <label for="description">Description *</label>
+                <textarea
+                    id="description"
+                    name="description"
+                    rows="5"
+                    placeholder="Describe the task in detail. What needs to be done? Any special requirements?"
+                    required
+                ></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="payment_amount">Payment Amount (₹) *</label>
+                <input
+                    type="number"
+                    id="payment_amount"
+                    name="payment_amount"
+                    placeholder="e.g., 500"
+                    min="0"
+                    step="0.01"
+                    required
+                >
+                <small>How much will you pay the helper?</small>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="latitude">Latitude (optional)</label>
+                    <input
+                        type="number"
+                        id="latitude"
+                        name="latitude"
+                        placeholder="e.g., 28.6139"
+                        step="0.000001"
+                    >
+                </div>
+                <div class="form-group">
+                    <label for="longitude">Longitude (optional)</label>
+                    <input
+                        type="number"
+                        id="longitude"
+                        name="longitude"
+                        placeholder="e.g., 77.2090"
+                        step="0.000001"
+                    >
+                </div>
+            </div>
+            <small>📍 Location helps helpers find nearby tasks</small>
+
+            <div class="form-actions">
+                <a href="{% url 'dashboard' %}" class="btn btn-secondary">Cancel</a>
+                <button type="submit" class="btn btn-primary">📤 Post Task</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

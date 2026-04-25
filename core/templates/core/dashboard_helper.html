@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}Helper Dashboard - LocalHelp{% endblock %}
+
+{% block content %}
+<div class="dashboard">
+    <div class="dashboard-header">
+        <h2>🔧 Helper Dashboard</h2>
+        <div>
+            <span class="stat-inline">⭐ Trust Score: {{ profile.trust_score }}</span>
+        </div>
+    </div>
+
+    {% if my_accepted_task or my_completion_task %}
+        {% with current_task=my_accepted_task|default:my_completion_task %}
+        <div class="active-task-banner">
+            <h3>🎯 Your Active Task</h3>
+            <div class="task-card status-accepted">
+                <div class="task-card-header">
+                    <h4><a href="{% url 'task_detail' current_task.id %}">{{ current_task.title }}</a></h4>
+                    <span class="status-badge status-{{ current_task.status|lower }}">{{ current_task.status }}</span>
+                </div>
+                <p>{{ current_task.description|truncatechars:150 }}</p>
+                <div class="task-meta">
+                    <span>💰 ₹{{ current_task.payment_amount }}</span>
+                    <span>👤 Posted by: <a href="{% url 'profile' current_task.requester.username %}">{{ current_task.requester.username }}</a></span>
+                </div>
+
+                <div class="task-actions">
+                    {% if current_task.status == 'ACCEPTED' %}
+                        <form method="post" action="{% url 'request_completion' current_task.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-success">✅ Mark as Done</button>
+                        </form>
+                        <a href="{% url 'cancel_task' current_task.id %}" class="btn btn-danger">❌ Cancel Task</a>
+                    {% endif %}
+
+                    {% if current_task.status == 'COMPLETION_REQUESTED' %}
+                        <div class="info-box">
+                            ⏳ Waiting for {{ current_task.requester.username }} to approve completion...
+                        </div>
+                    {% endif %}
+
+                    <a href="{% url 'task_detail' current_task.id %}" class="btn btn-secondary">View Details</a>
+                </div>
+            </div>
+        </div>
+        {% endwith %}
+    {% endif %}
+
+    {% with completed_tasks=request.user.tasks_as_helper.all %}
+        {% for ct in completed_tasks %}
+            {% if ct.status == 'COMPLETED' %}
+            {% endif %}
+        {% endfor %}
+    {% endwith %}
+
+    <h3>📂 Available Tasks</h3>
+
+    {% if my_accepted_task %}
+        <div class="warning-box">
+            ⚠️ You already have an active task. Complete or cancel it before accepting a new one.
+        </div>
+    {% endif %}
+
+    {% if open_tasks %}
+        <div class="task-list">
+            {% for task in open_tasks %}
+                <div class="task-card status-open">
+                    <div class="task-card-header">
+                        <h4><a href="{% url 'task_detail' task.id %}">{{ task.title }}</a></h4>
+                        <span class="status-badge status-open">OPEN</span>
+                    </div>
+
+                    <p class="task-desc">{{ task.description|truncatechars:120 }}</p>
+
+                    <div class="task-meta">
+                        <span>💰 ₹{{ task.payment_amount }}</span>
+                        <span>👤 <a href="{% url 'profile' task.requester.username %}">{{ task.requester.username }}</a></span>
+                        <span>📅 {{ task.created_at|date:"M d, H:i" }}</span>
+                    </div>
+
+                    <div class="task-actions">
+                        {% if task.requester != request.user and not my_accepted_task %}
+                            <form method="post" action="{% url 'accept_task' task.id %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-primary">🤝 Accept Task</button>
+                            </form>
+                        {% elif task.requester == request.user %}
+                            <span class="tag tag-own">Your Task</span>
+                        {% else %}
+                            <span class="tag tag-busy">Busy</span>
+                        {% endif %}
+
+                        <a href="{% url 'task_detail' task.id %}" class="btn btn-secondary">Details</a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <span class="empty-icon">🔍</span>
+            <p>No open tasks available right now. Check back soon!</p>
+        </div>
+    {% endif %}
+
+</div>
+{% endblock %}

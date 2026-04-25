@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}{{ profile_user.username }}'s Profile - LocalHelp{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+
+    <div class="profile-header">
+        <div class="profile-avatar">
+            {{ profile_user.username|first|upper }}
+        </div>
+        <div class="profile-info">
+            <h2>{{ profile_user.username }}</h2>
+            <span class="role-badge role-{{ profile.active_role }}">
+                {{ profile.active_role|capfirst }}
+            </span>
+            <div class="trust-score">
+                {% if profile.trust_score > 0 %}
+                    ⭐ Trust Score: <strong>{{ profile.trust_score }}</strong> / 5.0
+                {% else %}
+                    ⭐ No ratings yet
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="profile-stats">
+        <div class="stat-card">
+            <span class="stat-number">{{ tasks_as_requester }}</span>
+            <span class="stat-title">Tasks Posted</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-number">{{ tasks_as_helper }}</span>
+            <span class="stat-title">Tasks Completed</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-number">{{ received_ratings|length }}</span>
+            <span class="stat-title">Reviews Received</span>
+        </div>
+    </div>
+
+    <div class="profile-reviews">
+        <h3>⭐ Reviews Received</h3>
+
+        {% if received_ratings %}
+            {% for rating in received_ratings %}
+                <div class="rating-card">
+                    <div class="rating-header">
+                        <a href="{% url 'profile' rating.rater.username %}">{{ rating.rater.username }}</a>
+                        <span class="stars">
+                            {% for i in "12345" %}
+                                {% if forloop.counter <= rating.rating %}⭐{% else %}☆{% endif %}
+                            {% endfor %}
+                            ({{ rating.rating }}/5)
+                        </span>
+                        <small>{{ rating.created_at|date:"M d, Y" }}</small>
+                    </div>
+                    {% if rating.comment %}
+                        <p class="rating-comment">"{{ rating.comment }}"</p>
+                    {% endif %}
+                    <small>For task: <a href="{% url 'task_detail' rating.task.id %}">{{ rating.task.title }}</a></small>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <p>No reviews yet.</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <div style="text-align: center; margin-top: 2rem;">
+        <a href="{% url 'dashboard' %}" class="btn btn-secondary">← Back to Dashboard</a>
+    </div>
+</div>
+{% endblock %}

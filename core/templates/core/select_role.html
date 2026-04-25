@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}Select Role - LocalHelp{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <h2>🎭 Choose Your Role</h2>
+        <p class="auth-subtitle">
+            Currently active as:
+            <strong>{{ profile.active_role|capfirst }}</strong>
+        </p>
+
+        <form method="post" action="{% url 'select_role' %}">
+            {% csrf_token %}
+
+            <div class="role-cards">
+
+                <label class="role-card {% if profile.active_role == 'requester' %}active{% endif %}">
+                    <input
+                        type="radio"
+                        name="role"
+                        value="requester"
+                        {% if profile.active_role == 'requester' %}checked{% endif %}
+                    >
+                    <span class="role-icon">📋</span>
+                    <span class="role-name">Requester</span>
+                    <span class="role-desc">Post tasks and find helpers</span>
+                </label>
+
+                <label class="role-card {% if profile.active_role == 'helper' %}active{% endif %}">
+                    <input
+                        type="radio"
+                        name="role"
+                        value="helper"
+                        {% if profile.active_role == 'helper' %}checked{% endif %}
+                    >
+                    <span class="role-icon">🔧</span>
+                    <span class="role-name">Helper</span>
+                    <span class="role-desc">Accept tasks and earn money</span>
+                </label>
+
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-full">Save Role</button>
+        </form>
+
+        <p style="text-align:center; margin-top: 1rem;">
+            <a href="{% url 'dashboard' %}">← Back to Dashboard</a>
+        </p>
+    </div>
+</div>
+{% endblock %}
